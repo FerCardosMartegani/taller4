@@ -22,7 +22,7 @@ function setup() {
   isTouching = false;
   pantalla = prePantalla = MENU;
 
-  // producto = new Tren_Producto(width / 2, height / 2);
+  producto = new Tren_Producto(width / 2, height / 2);
 }
 
 // -------------------------------------------------------------------------------DRAW
@@ -30,13 +30,11 @@ function draw() {
   push();
   background(220);
 
-  console.log();
-
   // -----------------------------------------------------------------¿El usuario metió el dedo?
   isTouching = touches.length > 0;
   canDrag = isTouching && dragging != undefined; //sólo puede draggear si no está draggeando otra cosa
 
-  // producto.ejecutar();
+  producto.ejecutar();
 
   if (pantalla == prePantalla) {
     switch (pantalla) {
@@ -125,6 +123,7 @@ class Draggeable {
 
   // -----------------------------------------------------------------EJECUTAR
   ejecutar() {
+    push();
     if (touchStarted_ && canDrag) {
       let touch = touches[0];
       if (
@@ -145,7 +144,9 @@ class Draggeable {
     }
 
     // image(this.img, this.posX, this.posY);
+    fill(0);
     rect(this.posX, this.posY, this.width, this.height);
+    pop();
   }
 }
 
