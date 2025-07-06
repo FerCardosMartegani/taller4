@@ -36,6 +36,8 @@ function draw() {
 
   producto.ejecutar();
 
+  console.log(producto);
+
   if (pantalla == prePantalla) {
     switch (pantalla) {
       // -----------------------------------------------------------------MENU
