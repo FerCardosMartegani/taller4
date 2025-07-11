@@ -1,6 +1,11 @@
 // -------------------------------------------------------------------------------INTERDEPENDENCIA
-function interdependencia() {
-  //
+class Interdependencia {
+  constructor(){
+
+  }
+  ejecutar(){
+    
+  }
 }
 
 // -------------------------------------------------------------------------------CLASE TREN

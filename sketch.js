@@ -1,7 +1,8 @@
 // -------------------------------------------------------------------------------GLOBALES
-let isTouching, touchStarted_, dragging, canDrag;
+let isTouching, preIsTouching, _touchStarted, dragging, canDrag;
+let touchX, touchY;
 
-let pantalla, prePantalla;
+let pantalla, prePantalla, nextPantalla, pantallaCambiando;
 const MENU = 0;
 const ADAPTACION = 1;
 const INTERDEPENDENCIA = 2;
@@ -10,146 +11,79 @@ const SINERGIA = 4;
 const UMBRALES = 5;
 const JERARQUIA = 6;
 
-let producto;
+let estados = [];
+let menu_fondo_img, info_fondo_img, menu_btn_img;
 
 // -------------------------------------------------------------------------------PRELOAD
-function preload() {}
+function preload() {
+  info_fondo_img = loadImage("./0_menu/assets/fondo2.png");
+
+  menu_fondo_img = loadImage("./0_menu/assets/fondo.png");
+  menu_btn_img = loadImage("./0_menu/assets/menu_btn.png");
+}
 
 // -------------------------------------------------------------------------------SETUP
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(1133, 744);
+
+  rectMode(CENTER);
+  imageMode(CENTER);
+
+  estados[MENU] = new Menu();
+  estados[ADAPTACION] = new Adaptacion();
+  estados[INTERDEPENDENCIA] = new Interdependencia();
 
   isTouching = false;
-  pantalla = prePantalla = MENU;
 
-  producto = new Tren_Producto(width / 2, height / 2);
+  pantalla = prePantalla = nextPantalla = MENU;
+  pantallaCambiando = false;
 }
 
 // -------------------------------------------------------------------------------DRAW
 function draw() {
   push();
-  background(220);
 
-  // -----------------------------------------------------------------¿El usuario metió el dedo?
-  isTouching = touches.length > 0;
-  canDrag = isTouching && dragging != undefined; //sólo puede draggear si no está draggeando otra cosa
+  // -----------------------------------------------------------------Dedo del usuario
+  canDrag = isTouching && dragging == undefined; //sólo puede draggear si no está draggeando otra cosa
+  touchX = mouseX; //touches[0].x;
+  touchY = mouseY; //touches[0].y;
 
-  producto.ejecutar();
+  // -----------------------------------------------------------------Ejecutar infografías
+  if (!pantallaCambiando) {
+    estados[pantalla].ejecutar();
+  }
 
-  console.log(producto);
+  // -----------------------------------------------------------------Transición infografía ←→ menú
+  if (nextPantalla != pantalla && !pantallaCambiando) {
+    pantallaCambiando = true;
 
-  if (pantalla == prePantalla) {
-    switch (pantalla) {
-      // -----------------------------------------------------------------MENU
-      case MENU:
-        break;
-      // -----------------------------------------------------------------ADAPTACIÓN
-      case ADAPTACION:
-        break;
-      // -----------------------------------------------------------------INTERDEPENDENCIA
-      case INTERDEPENDENCIA:
-        interdependencia();
-        break;
-      // -----------------------------------------------------------------ATRACTORES
-      case ATRACTORES:
-        break;
-      // -----------------------------------------------------------------SINERGIA
-      case SINERGIA:
-        break;
-      // -----------------------------------------------------------------UMBRALES
-      case UMBRALES:
-        break;
-      // -----------------------------------------------------------------JERARQUÍA
-      case JERARQUIA:
-        break;
+    estados[MENU].ejecutar();
+
+    if (pantalla == MENU) {
+      estados[nextPantalla].anim_in.reset(); //menú → Infografía
+    } else if (nextPantalla == MENU) {
+      estados[pantalla].anim_out.reset(); //Infografía → Menú
     }
-  } else {
   }
 
   prePantalla = pantalla;
-  isTouching = touchStarted_ = false;
+  _touchStarted = false;
+
+  text(mouseX + " , " + mouseY, mouseX, mouseY);
   pop();
 }
 
 // -------------------------------------------------------------------------------TACTIL
 function touchStarted() {
-  touchStarted_ = true;
+  _touchStarted = true;
+  isTouching = true;
 }
 function touchEnded() {
   dragging = undefined;
+  isTouching = false;
 }
-
-// -------------------------------------------------------------------------------DETECTAR AREA REDONDA O CUADRADA
-function isInside(x1_, y1_, x_, y_, t1_, t2_) {
-  let dentro = false;
-  if (t2_ != undefined) {
-    // Seis parámetros para área cuadrada (x,y dentro del área x,y,ancho,alto)
-    dentro =
-      x1_ > x_ - t1_ / 2 &&
-      x1_ < x_ + t1_ / 2 &&
-      y1_ > y_ - t2_ / 2 &&
-      y1_ < y_ + t2_ / 2;
-  } else {
-    // Cinco parámetros para área circular (x,y dentro del área x,y,diámetro)
-    dentro = dist(x1_, y1_, x_, y_) < t1_ / 2;
-  }
-  return dentro;
-}
-
-// -------------------------------------------------------------------------------CLASE DRAG
-// x1,y1,r1 -> touchMoved -> x2,y2,r2
-class Draggeable {
-  // -----------------------------------------------------------------CONSTRUCTOR
-  constructor(x_, y_, d_) {
-    this.posX = x_;
-    this.posY = y_;
-
-    this.iposX = this.posX;
-    this.iposY = this.posY;
-
-    this.img;
-    // this.width = this.img.width;
-    // this.height = this.img.height;
-    this.width = 50;
-    this.height = 50;
-
-    if (Array.isArray(d_)) {
-      this.destino = d_;
-    } else {
-      this.destino = [];
-      // for(let d  this.destino){
-
-      // }
-    }
-  }
-
-  // -----------------------------------------------------------------EJECUTAR
-  ejecutar() {
-    push();
-    if (touchStarted_ && canDrag) {
-      let touch = touches[0];
-      if (
-        isInside(
-          touch.x,
-          touch.y,
-          this.posX,
-          this.posY,
-          this.width,
-          this.height
-        )
-      ) {
-        dragging = this;
-      }
-    } else {
-      this.posX = this.iposX;
-      this.posY = this.iposY;
-    }
-
-    // image(this.img, this.posX, this.posY);
-    fill(0);
-    rect(this.posX, this.posY, this.width, this.height);
-    pop();
-  }
+function mouseReleased() {
+  touchEnded();
 }
 
 // -------------------------------------------------------------------------------CLASE RUTA
