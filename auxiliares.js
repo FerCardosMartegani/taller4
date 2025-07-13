@@ -19,35 +19,37 @@ function isInside(x1_, y1_, x_, y_, t1_, t2_) {
 // x1,y1,r1 -> touchMoved -> x2,y2,r2
 class Draggeable {
   // -----------------------------------------------------------------CONSTRUCTOR
-  constructor(x_, y_, d_) {
+  constructor(img_, x_, y_, d_) {
     this.posX = x_;
     this.posY = y_;
+    this.rot = 0;
 
     this.iposX = this.posX;
     this.iposY = this.posY;
 
-    this.img;
-    // this.width = this.img.width;
-    // this.height = this.img.height;
-    this.width = 50;
-    this.height = 50;
+    this.img = img_;
+    this.width = this.img.width;
+    this.height = this.img.height;
 
     this.isDragging = false;
 
     if (Array.isArray(d_)) {
       this.destino = d_;
     } else {
-      this.destino;
+      this.destino = [];
+      this.destino[0] = d_;
     }
+    this.canDrag = true;
   }
 
   // -----------------------------------------------------------------EJECUTAR
   ejecutar() {
     push();
     translate(this.posX, this.posY);
+    rotate(radians(this.rot));
 
     // ----------------------------------------------INICIAR ARRASTRE
-    if (_touchStarted && canDrag) {
+    if (_touchStarted && canDrag && this.canDrag) {
       if (
         isInside(touchX, touchY, this.posX, this.posY, this.width, this.height)
       ) {
@@ -57,19 +59,64 @@ class Draggeable {
     this.isDragging = dragging == this; //reconocer si este es el objeto draggeado
 
     // ----------------------------------------------ARRASTRAR
-    if (this.isDragging) {
-      this.posX = touchX;
-      this.posY = touchY;
-    } else {
-      this.posX = this.iposX;
-      this.posY = this.iposY;
+    if (this.canDrag) {
+      if (this.isDragging) {
+        this.posX = touchX; //mover al cursor
+        this.posY = touchY;
+      } else {
+        let ubicado = undefined;
+        for (let destino of this.destino) {
+          if (
+            isInside(
+              this.posX,
+              this.posY,
+              destino.x,
+              destino.y,
+              destino.w,
+              destino.h
+            ) &&
+            destino.empty
+          ) {
+            ubicado = destino;
+            break;
+          }
+        }
+        if (ubicado != undefined) {
+          this.posX = ubicado.x; //ubicarse en el destino
+          this.posY = ubicado.y;
+
+          this.canDrag = false;
+          ubicado.empty = false;
+        } else {
+          this.posX = this.iposX; //volver al inicio
+          this.posY = this.iposY;
+        }
+      }
     }
 
-    // image(this.img, this.posX, this.posY);
-    fill(0);
-    rect(0, 0, this.width, this.height);
+    image(this.img, 0, 0);
     pop();
   }
+}
+
+// -------------------------------------------------------------------------------CLASE LUGAR AL QUE DRAGGEAR
+class DragTo {
+  // -----------------------------------------------------------------CONSTRUCTOR
+  constructor(x_, y_, w_, h_) {
+    this.x = x_;
+    this.y = y_;
+    this.w = w_;
+    if (h_ != undefined) {
+      this.h = h_;
+    } else {
+      this.h = this.w;
+    }
+
+    this.empty = true;
+  }
+
+  // -----------------------------------------------------------------EJECUTAR
+  ejecutar() {}
 }
 
 // -------------------------------------------------------------------------------CLASE INFOGRAFÍA
@@ -78,21 +125,52 @@ class Infog {
   constructor() {
     this.fondo = info_fondo_img;
 
-    this.anim_in = new Timer();
-    this.anim_out = new Timer();
+    this.entrando = false;
+    this.saliendo = false;
+    this.animTimer = new Timer();
+    this.animEtapa = 0;
   }
 
   // -----------------------------------------------------------------EJECUTAR
   ejecutar() {
     push();
-    image(this.fondo, width / 2, height / 2); //imágen de fondo
+    // ----------------------------------------------ANIMACIÓN DE ENTRAR
+    if (this.entrando) {
+      this.animTimer.correr();
+
+      if (!this.animTimer.delayed(1)) {
+        translate(0, this.animTimer.map(-this.fondo.height / 3, 0));
+        scale(this.animTimer.map(2, 1));
+        tint(255, this.animTimer.map(0, 500));
+      } else {
+        pantalla = nextPantalla;
+        this.entrando = false;
+        this.animTimer.reset();
+      }
+    }
+
+    // ----------------------------------------------ANIMACIÓN DE SALIR
+    if (this.saliendo) {
+      this.animTimer.correr();
+
+      if (!this.animTimer.delayed(1)) {
+        translate(0, this.animTimer.map(0, -this.fondo.height / 3));
+        scale(this.animTimer.map(1, 2));
+        tint(255, this.animTimer.map(500, -100));
+      } else {
+        pantalla = nextPantalla;
+        this.saliendo = false;
+        this.animTimer.reset();
+      }
+    }
+
+    // ----------------------------------------------Imagen de fondo
+    imageMode(CORNER);
+    image(this.fondo, 0, 0);
+    imageMode(CENTER);
 
     // ----------------------------------------------En todas menos el menú
     if (pantalla > 0) {
-      fill(255, 100);
-      rectMode(CORNERS);
-      rect(0, 0, width, height); //desaturar el fondo
-
       image(menu_btn_img, menu_btn_img.width, menu_btn_img.height); //botón al menú
       if (
         isInside(
@@ -108,7 +186,6 @@ class Infog {
         nextPantalla = MENU;
       }
     }
-    pop();
   }
 }
 
@@ -116,17 +193,73 @@ class Infog {
 class Timer {
   constructor() {
     this.tiempo = 0;
+    this.delay = frameRate();
   }
 
   correr() {
-    this.tiempo++;
+    if (this.delay > 0) {
+      this.tiempo++;
+    }
   }
 
-  delay(d_) {
-    return this.tiempo >= d_ * frameRate();
+  delayed(d_) {
+    this.delay = d_ * frameRate();
+    return this.tiempo >= this.delay;
   }
 
   reset() {
     this.tiempo = 0;
+  }
+
+  map(a_, b_) {
+    return map(this.tiempo, 0, this.delay, a_, b_);
+  }
+}
+
+// -------------------------------------------------------------------------------CLASE MÓVIL
+class Desplazable {
+  // -----------------------------------------------------------------CONSTRUCTOR
+  constructor(img_, a_, p1_) {
+    this.img = img_;
+
+    this.posiciones = a_;
+    this.pos = p1_;
+    this.posX = a_[this.pos].x;
+    this.posY = a_[this.pos].y;
+
+    this.terminado = false;
+
+    this.vel = new Timer();
+  }
+
+  // -----------------------------------------------------------------EJECUTAR
+  ejecutar(d_) {
+    push();
+    this.vel.correr();
+
+    if (!pantallaCambiando && !this.terminado) {
+      if (this.pos < this.posiciones.length - 1) {
+        if (!this.vel.delayed(d_)) {
+          this.posX = this.vel.map(
+            this.posiciones[this.pos].x,
+            this.posiciones[this.pos + 1].x
+          );
+          this.posY = this.vel.map(
+            this.posiciones[this.pos].y,
+            this.posiciones[this.pos + 1].y
+          );
+        } else {
+          this.vel.reset();
+          this.pos++;
+        }
+      } else {
+        this.terminado = true;
+      }
+    }
+
+    image(this.img, this.posX, this.posY);
+    // ellipse(this.posX, this.posY, 50);
+
+    pop();
   }
 }

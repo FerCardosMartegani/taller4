@@ -1,5 +1,6 @@
 // -------------------------------------------------------------------------------CLASE MENÚ
 class Menu extends Infog {
+  // -----------------------------------------------------------------CONSTRUCTOR
   constructor() {
     super();
     this.fondo = menu_fondo_img;
@@ -11,6 +12,7 @@ class Menu extends Infog {
     this.estantePosY = this.estanteCornerY + this.estanteTam / 2;
   }
 
+  // -----------------------------------------------------------------EJECUTAR
   ejecutar() {
     push();
     super.ejecutar();
@@ -23,7 +25,8 @@ class Menu extends Infog {
           this.estanteTam,
           this.estanteTam
         );
-
+        
+        // ----------------------------------------------SELECTOR DE INFOGRAFÍA
         if (
           isInside(
             mouseX,
@@ -35,7 +38,6 @@ class Menu extends Infog {
           )
         ) {
           let index = i + (j > 0 ? 4 : 1);
-          console.log("Dentro" + index);
 
           if (_touchStarted) {
             nextPantalla = index;
