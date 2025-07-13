@@ -18,6 +18,7 @@
       const script = document.createElement("script");
       let v = Date.now(); // agrega timestamp único
       script.src = "./sketch.js?v=" + v;
+      console.log("versión: " + v);
       document.body.appendChild(script);
     </script>
 
