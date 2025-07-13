@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Sketch</title>
+    <title>Tp1 G10</title>
 
     <link rel="stylesheet" type="text/css" href="style.css" />
 
@@ -13,10 +13,17 @@
   </head>
 
   <body>
-    <script src="sketch.js"></script>
-    <script src="auxiliares.js"></script>
-    <script src="0_menu/menu.js"></script>
-    <script src="i_adaptacion/adaptacion.js"></script>
-    <script src="i_interdependencia/interdependencia.js"></script>
+    <!-- <script src="./sketch.js"></script> -->
+    <script>
+      const script = document.createElement("script");
+      let v = Date.now(); // agrega timestamp único
+      script.src = "./sketch.js?v=" + v;
+      document.body.appendChild(script);
+    </script>
+
+    <script src="./auxiliares.js"></script>
+    <script src="./0_menu/menu.js"></script>
+    <script src="./i_adaptacion/adaptacion.js"></script>
+    <script src="./i_interdependencia/interdependencia.js"></script>
   </body>
 </html>

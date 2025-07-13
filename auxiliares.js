@@ -188,11 +188,15 @@ class Infog {
     }
 
     // ----------------------------------------------Imagen de fondo
+    push();
     imageMode(CORNER);
     image(this.fondo, 0, 0);
 
-    imageMode(CENTER);
-    image(menu_btn_img, menu_btn_img.width, menu_btn_img.height);
+    if (pantalla > MENU && !pantallaCambiando) {
+      imageMode(CENTER);
+      image(menu_btn_img, menu_btn_img.width, menu_btn_img.height);
+    }
+    pop();
   }
 }
 
