@@ -11,12 +11,12 @@ class Adaptacion extends Infog {
 
     // ----------------------------------------------Torre de la izquierda
     let puntosIzq = [];
-    puntosIzq[0] = { x: col1, y: -100 };
-    puntosIzq[1] = { x: col1, y: 190 };
-    puntosIzq[2] = { x: col2, y: 250 };
-    puntosIzq[3] = { x: col2, y: 450 };
-    puntosIzq[4] = { x: col1, y: 490 };
-    puntosIzq[5] = { x: col1, y: 590 };
+    puntosIzq[0] = { x: col2, y: -100 };
+    puntosIzq[1] = { x: col2, y: 190 };
+    puntosIzq[2] = { x: col1, y: 250 };
+    puntosIzq[3] = { x: col1, y: 450 };
+    puntosIzq[4] = { x: col2, y: 490 };
+    puntosIzq[5] = { x: col2, y: 590 };
 
     this.bolitasIzq = [];
     for (let i = 0; i < puntosIzq.length - 1; i++) {

@@ -40,10 +40,13 @@ class Draggeable {
       this.destino[0] = d_;
     }
     this.canDrag = true;
+    this.preCanDrag = this.canDrag;
   }
 
   // -----------------------------------------------------------------EJECUTAR
   ejecutar() {
+    this.preCanDrag = this.canDrag;
+
     push();
     translate(this.posX, this.posY);
     rotate(radians(this.rot));
@@ -94,6 +97,7 @@ class Draggeable {
       }
     }
 
+    // rect(0, 0, this.width, this.height);
     image(this.img, 0, 0);
     pop();
   }
@@ -125,7 +129,7 @@ class Infog {
   constructor() {
     this.fondo = info_fondo_img;
 
-    this.entrando = false;
+    this.entrando = true;
     this.saliendo = false;
     this.animTimer = new Timer();
     this.animEtapa = 0;
@@ -161,17 +165,13 @@ class Infog {
         pantalla = nextPantalla;
         this.saliendo = false;
         this.animTimer.reset();
+
+        translate(-this.fondo.width, -this.fondo.height);
       }
     }
 
-    // ----------------------------------------------Imagen de fondo
-    imageMode(CORNER);
-    image(this.fondo, 0, 0);
-    imageMode(CENTER);
-
-    // ----------------------------------------------En todas menos el menú
-    if (pantalla > 0) {
-      image(menu_btn_img, menu_btn_img.width, menu_btn_img.height); //botón al menú
+    // ----------------------------------------------Botón al menú
+    if (pantalla > MENU) {
       if (
         isInside(
           touchX,
@@ -186,6 +186,13 @@ class Infog {
         nextPantalla = MENU;
       }
     }
+
+    // ----------------------------------------------Imagen de fondo
+    imageMode(CORNER);
+    image(this.fondo, 0, 0);
+
+    imageMode(CENTER);
+    image(menu_btn_img, menu_btn_img.width, menu_btn_img.height);
   }
 }
 
@@ -197,7 +204,7 @@ class Timer {
   }
 
   correr() {
-    if (this.delay > 0) {
+    if (this.delay >= 0) {
       this.tiempo++;
     }
   }
@@ -226,18 +233,23 @@ class Desplazable {
     this.pos = p1_;
     this.posX = a_[this.pos].x;
     this.posY = a_[this.pos].y;
+    this.prePos = this.pos;
 
     this.terminado = false;
 
     this.vel = new Timer();
+
+    this.sentido = +1;
   }
 
   // -----------------------------------------------------------------EJECUTAR
   ejecutar(d_) {
     push();
-    this.vel.correr();
-
     if (!pantallaCambiando && !this.terminado) {
+      this.prePos = this.pos;
+
+      this.vel.correr();
+
       if (this.pos < this.posiciones.length - 1) {
         if (!this.vel.delayed(d_)) {
           this.posX = this.vel.map(
@@ -257,7 +269,9 @@ class Desplazable {
       }
     }
 
-    image(this.img, this.posX, this.posY);
+    translate(this.posX, this.posY);
+    scale(this.sentido, 1);
+    image(this.img, 0, 0);
     // ellipse(this.posX, this.posY, 50);
 
     pop();
