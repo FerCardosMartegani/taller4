@@ -8,6 +8,8 @@ class Interdependencia extends Infog {
     this.tren = new Tren();
     this.prePos = 0;
 
+    this.tren_fx = new Sonido(inter_tren_fx);
+
     this.productos = [];
     this.productos[0] = new Producto(
       inter_cosecha_img,
@@ -16,6 +18,9 @@ class Interdependencia extends Infog {
       570,
       this.tren.carga
     );
+
+    this.cosecha_fx = new Sonido(inter_cosecha_fx);
+    this.gallinas_fx = new Sonido(inter_gallina_fx);
 
     this.productosStart = [];
     this.productosStart.push(this.productos[0].start);
@@ -35,6 +40,9 @@ class Interdependencia extends Infog {
       let img = inter_edificios_img[i + 1];
       this.mejorasCiudad[i] = new JugueteNuevo(img, poses[i].x, poses[i].y);
     }
+
+    this.edificio_fx = new Sonido(inter_edificios_fx);
+    this.moneda_fx = new Sonido(inter_moneda_fx);
 
     this.ciudadDragTo = [];
     for (let i = 0; i < this.mejorasCiudad.length; i++) {
@@ -100,21 +108,37 @@ class Interdependencia extends Infog {
     // ----------------------------------------------CULTIVOS
     let cargados = 0;
     nivel = constrain(this.nivel, 0, this.productos.length - 1);
+
     if (this.prePos == this.tren.pos) {
+      if (dragging == this.productos[0]) {
+        this.cosecha_fx.play(false); //sonido de cosecha
+      } else {
+        this.cosecha_fx.replay();
+      }
+      if (this.productos.length > 1 && dragging == this.productos[1]) {
+        this.gallinas_fx.play(false); //sonido de cosecha
+      } else if(!this.gallinas_fx.isPlaying()){
+        this.gallinas_fx.replay();
+      }
+
       for (let i = 0; i < this.productos.length; i++) {
         this.productos[i].ejecutar();
 
         if (!this.productos[i].canDrag) {
-          cargados++;
+          cargados++; //contar cuántos se subieron al tren
 
           if (this.tren.pos == 0) {
-            this.productos[i].posX = this.tren.posX-70;
-            this.productos[i].posY = this.tren.posY+15;
+            this.productos[i].posX = this.tren.posX - 70;
+            this.productos[i].posY = this.tren.posY + 15;
             this.productos[i].img = this.productos[i].start.i2[0];
           } else {
             if (this.productos[i].preCanDrag) {
               this.productos[i].posX = width * 2;
               this.nivel++;
+
+              this.moneda_fx.play(false);
+            } else {
+              this.moneda_fx.replay();
             }
           }
         }
@@ -123,6 +147,14 @@ class Interdependencia extends Infog {
 
     // ----------------------------------------------TREN
     this.tren.ejecutar(cargados, nivel);
+
+    if (!this.tren.terminado) {
+      if (this.tren.pos == 0) {
+        this.tren_fx.play(false);
+      }
+    } else {
+      this.tren_fx.replay();
+    }
 
     for (let i = 0; i <= nivel; i++) {
       // console.log(this.prePos + " → " + this.tren.pos);
@@ -144,8 +176,8 @@ class Interdependencia extends Infog {
           this.productos[i] = new Producto(
             this.productosStart[i].i2,
             this.productosStart[i].i1,
-            this.tren.posX-70,
-            this.tren.posY+15,
+            this.tren.posX - 70,
+            this.tren.posY + 15,
             this.ciudadDragTo
           );
         }

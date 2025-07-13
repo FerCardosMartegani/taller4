@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------------------GLOBALES
-let isTouching, preIsTouching, _touchStarted, dragging, canDrag;
+let isTouching, preIsTouching, _touchStarted, dragging, preDragging, canDrag;
 let touchX, touchY;
 
 let pantalla, prePantalla, nextPantalla, pantallaCambiando;
@@ -24,8 +24,7 @@ let adap_refe_img,
   adap_rampaNuevaIzq_img,
   adap_rampaNuevaDer_img,
   adap_rampaRotaIzq_img,
-  adap_rampaRotaDer1_img,
-  adap_rampaRotaDer2_img,
+  adap_rampaRotaDer_img = [],
   adap_embudoNuevo_img,
   adap_embudoRoto_img,
   adap_bolitas_img = [],
@@ -42,6 +41,11 @@ let inter_refe_img,
   inter_cosechaTren_img = [],
   inter_huevoTren_img = [],
   inter_edificios_img = [];
+let inter_tren_fx,
+  inter_edificios_fx,
+  inter_moneda_fx,
+  inter_cosecha_fx,
+  inter_gallina_fx;
 
 let debug = true;
 
@@ -66,8 +70,11 @@ function preload() {
   adap_rampaNuevaIzq_img = loadImage("./i_adaptacion/assets/nuevaRampaIzq.png");
   adap_embudoNuevo_img = loadImage("./i_adaptacion/assets/nuevoEmbudo.png");
   adap_tuboNuevo_img = loadImage("./i_adaptacion/assets/nuevoTubo.png");
-  adap_rampaRotaDer1_img = loadImage("./i_adaptacion/assets/rotaRampaDer1.png");
-  adap_rampaRotaDer2_img = loadImage("./i_adaptacion/assets/rotaRampaDer2.png");
+  for (let i = 1; i <= 2; i++) {
+    adap_rampaRotaDer_img[i - 1] = loadImage(
+      "./i_adaptacion/assets/rotaRampaDer" + i + ".png"
+    );
+  }
   adap_rampaRotaIzq_img = loadImage("./i_adaptacion/assets/rotaRampaIzq.png");
   adap_embudoRoto_img = loadImage("./i_adaptacion/assets/rotoEmbudo.png");
   for (let i = 1; i <= 3; i++) {
@@ -107,6 +114,12 @@ function preload() {
   );
   inter_huevoTren_img[0] = loadImage("./i_interdependencia/assets/huevo3.png");
   inter_huevoTren_img[1] = loadImage("./i_interdependencia/assets/huevo4.png");
+
+  inter_cosecha_fx = loadSound("./i_interdependencia/assets/cosecha.wav");
+  inter_edificios_fx = loadSound("./i_interdependencia/assets/edificios.wav");
+  inter_gallina_fx = loadSound("./i_interdependencia/assets/gallinas.wav");
+  inter_moneda_fx = loadSound("./i_interdependencia/assets/moneda.wav");
+  inter_tren_fx = loadSound("./i_interdependencia/assets/tren.wav");
 }
 
 // -------------------------------------------------------------------------------SETUP
@@ -125,7 +138,8 @@ function setup() {
 
   isTouching = false;
 
-  pantalla = prePantalla = nextPantalla = MENU;
+  pantalla = MENU;
+  prePantalla = nextPantalla = INTERDEPENDENCIA;
   pantallaCambiando = false;
 }
 
@@ -220,6 +234,7 @@ function draw() {
 
   prePantalla = pantalla;
   _touchStarted = false;
+  preDragging = dragging;
 
   pop();
 }

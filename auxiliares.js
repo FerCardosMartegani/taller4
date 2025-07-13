@@ -281,3 +281,33 @@ class Desplazable {
     pop();
   }
 }
+
+// -------------------------------------------------------------------------------CLASE MÓVIL
+class Sonido {
+  // -----------------------------------------------------------------CONSTRUCTOR
+  constructor(s_) {
+    this.sonido = s_;
+
+    this.sonado = false;
+  }
+
+  // -----------------------------------------------------------------PLAY
+  play(b_) {
+    this.preSonado = this.sonado;
+    if (b_ === true || !this.sonado) {
+      this.sonido.play();
+
+      this.sonado = true;
+    }
+  }
+
+  // -----------------------------------------------------------------VOLVER A HABILITAR
+  replay() {
+    this.sonado = false;
+  }
+
+  // -----------------------------------------------------------------¿ESTÁ SONANDO?
+  isPlaying() {
+    return this.sonido.isPlaying();
+  }
+}
