@@ -1,5 +1,11 @@
 // -------------------------------------------------------------------------------GLOBALES
-let isTouching, preIsTouching, _touchStarted, dragging, preDragging, canDrag;
+let isTouching,
+  isMoving,
+  _touchStarted,
+  _touchEnded,
+  dragging,
+  preDragging,
+  canDrag;
 let touchX, touchY;
 
 let pantalla, prePantalla, nextPantalla, pantallaCambiando;
@@ -48,6 +54,13 @@ let inter_tren_fx,
   inter_moneda_fx,
   inter_cosecha_fx,
   inter_gallina_fx;
+
+let jerar_personajesSin_img = [];
+let jerar_lideres_img = [];
+let jerar_personajesCon_img = [];
+let jerar_torres_img = [],
+  jerar_podio_img;
+let jerar_sube_fx, jerar_torre_fx, jerar_caida_fx;
 
 let debug = true;
 
@@ -126,6 +139,24 @@ function preload() {
   inter_gallina_fx = loadSound("./i_interdependencia/assets/gallinas.wav");
   inter_moneda_fx = loadSound("./i_interdependencia/assets/moneda.wav");
   inter_tren_fx = loadSound("./i_interdependencia/assets/tren.wav");
+
+  //------------------------------------------------------------------Jerarquía
+  for (let i = 0; i < 4; i++) {
+    jerar_personajesSin_img[i] = loadImage(
+      "./i_jerarquia/assets/persona" + i + "-0" + ".png"
+    );
+    jerar_personajesCon_img[i] = loadImage(
+      "./i_jerarquia/assets/persona" + i + "-1" + ".png"
+    );
+    jerar_lideres_img[i] = loadImage("./i_jerarquia/assets/lider" + i + ".png");
+    jerar_torres_img[i] = loadImage("./i_jerarquia/assets/torre" + i + ".png");
+  }
+  jerar_podio_img = loadImage("./i_jerarquia/assets/podio.png");
+
+  // Cargar sonidos
+  jerar_sube_fx = loadSound("./i_jerarquia/assets/poner.wav");
+  jerar_torre_fx = loadSound("./i_jerarquia/assets/edificios.wav");
+  jerar_caida_fx = loadSound("./i_jerarquia/assets/caer.wav");
 }
 
 // -------------------------------------------------------------------------------SETUP
@@ -142,10 +173,10 @@ function setup() {
   // estados[ADAPTACION] = new Adaptacion();
   // estados[INTERDEPENDENCIA] = new Interdependencia();
 
-  isTouching = false;
+  isTouching = _touchStarted = _touchEnded = isMoving = false;
 
   pantalla = MENU;
-  prePantalla = nextPantalla = ADAPTACION;
+  prePantalla = nextPantalla = JERARQUIA;
   pantallaCambiando = false;
 }
 
@@ -174,7 +205,7 @@ function draw() {
           estado = new Adaptacion();
           break;
         case JERARQUIA:
-          estado = new Adaptacion();
+          estado = new Jerarquia();
           break;
         case SINERGIA:
           estado = new Adaptacion();
@@ -183,6 +214,7 @@ function draw() {
           estado = new Adaptacion();
           break;
       }
+
       // estados[nextPantalla].entrando = true; //menú → Infografía
     } else if (nextPantalla == MENU) {
       // estados[pantalla].saliendo = true; //Infografía → Menú
@@ -239,7 +271,7 @@ function draw() {
   }
 
   prePantalla = pantalla;
-  _touchStarted = false;
+  _touchStarted = isMoving = _touchEnded = false;
   preDragging = dragging;
 
   pop();
@@ -249,6 +281,15 @@ function draw() {
 function touchStarted() {
   _touchStarted = true;
   isTouching = true;
+}
+function mousePressed() {
+  touchStarted();
+}
+function touchMoved() {
+  isMoving = true;
+}
+function mouseDragged() {
+  touchMoved();
 }
 function touchEnded() {
   dragging = undefined;
