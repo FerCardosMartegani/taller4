@@ -8,6 +8,7 @@ class Menu extends Infog {
     this.estanteCornerX = 184;
     this.estanteCornerY = 212;
     this.estanteTam = 440 - this.estanteCornerX;
+    console.log("tamMueble: " + this.estanteTam);
     this.estantePosX = this.estanteCornerX + this.estanteTam / 2;
     this.estantePosY = this.estanteCornerY + this.estanteTam / 2;
   }
@@ -25,7 +26,7 @@ class Menu extends Infog {
           this.estanteTam,
           this.estanteTam
         );
-        
+
         // ----------------------------------------------SELECTOR DE INFOGRAFÍA
         if (
           isInside(

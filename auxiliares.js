@@ -294,7 +294,7 @@ class Sonido {
   // -----------------------------------------------------------------PLAY
   play(b_) {
     this.preSonado = this.sonado;
-    if (b_ === true || !this.sonado) {
+    if ((b_ === true && !this.isPlaying()) || !this.sonado) {
       this.sonido.play();
 
       this.sonado = true;

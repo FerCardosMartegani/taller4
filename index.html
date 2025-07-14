@@ -15,6 +15,7 @@
   <body>
     <!-- <script src="./sketch.js"></script> -->
     <script>
+      localStorage.clear();
       const script = document.createElement("script");
       let v = Date.now(); // agrega timestamp único
       script.src = "./sketch.js?v=" + v;

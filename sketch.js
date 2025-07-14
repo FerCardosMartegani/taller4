@@ -29,6 +29,8 @@ let adap_refe_img,
   adap_embudoRoto_img,
   adap_bolitas_img = [],
   adap_tubosRotos_img = [];
+let adap_bolitas_fx, adap_nueva1_fx, adap_nueva2_fx;
+
 let inter_refe_img,
   inter_granja_img,
   inter_huerta_img,
@@ -85,6 +87,10 @@ function preload() {
   adap_torreDer_img = loadImage("./i_adaptacion/assets/torreDer.png");
   adap_torreIzq_img = loadImage("./i_adaptacion/assets/torreIzq.png");
 
+  adap_bolitas_fx = loadSound("./i_adaptacion/assets/bolitas.wav");
+  adap_nueva1_fx = loadSound("./i_adaptacion/assets/nuevaDrag.wav");
+  adap_nueva2_fx = loadSound("./i_adaptacion/assets/nuevaPoner.wav");
+
   // -----------------------------------------------------------------Interdependencia
   inter_refe_img = loadImage("./i_interdependencia/assets/referencia.png");
   for (let i = 0; i < 5; i++) {
@@ -139,7 +145,7 @@ function setup() {
   isTouching = false;
 
   pantalla = MENU;
-  prePantalla = nextPantalla = INTERDEPENDENCIA;
+  prePantalla = nextPantalla = ADAPTACION;
   pantallaCambiando = false;
 }
 
