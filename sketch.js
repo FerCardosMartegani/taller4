@@ -8,6 +8,8 @@ let isTouching,
   canDrag;
 let touchX, touchY;
 
+let manos;
+
 let pantalla, prePantalla, nextPantalla, pantallaCambiando;
 const MENU = 0;
 const ADAPTACION = 1;
@@ -62,7 +64,26 @@ let jerar_torres_img = [],
   jerar_podio_img;
 let jerar_sube_fx, jerar_torre_fx, jerar_caida_fx;
 
-let debug = true;
+// let atra_mascara_img;
+// let atra_imagenes_img = [];
+// let atra_sonidoArrastre_fx;
+// let atra_sonidosTipo_fx = {};
+// let atra_fondo_img;
+// let atra_sonidoFondo_fx;
+
+let atra_fondo1_img,
+  atra_fondo2_img,
+  sine_fondo1_img,
+  sine_fondo2_img,
+  umbra_fondo1_img,
+  umbra_fondo2_img;
+
+let musica_fx;
+
+let logos_img = [];
+let manos_img;
+
+let debug = false;
 
 // -------------------------------------------------------------------------------PRELOAD
 function preload() {
@@ -157,6 +178,35 @@ function preload() {
   jerar_sube_fx = loadSound("./i_jerarquia/assets/poner.wav");
   jerar_torre_fx = loadSound("./i_jerarquia/assets/edificios.wav");
   jerar_caida_fx = loadSound("./i_jerarquia/assets/caer.wav");
+
+  //------------------------------------------------------------------Atractores
+  // atra_fondo_img = loadImage("./i_atractores/fondo.png");
+  // atra_mascara_img = loadImage("./i_atractores/mascara.png");
+  // for (let i = 0; i < 8; i++) {
+  //   atra_imagenes_img[i] = loadImage("./i_atractores/obj" + i + ".png");
+  // }
+
+  // atra_sonidoFondo_fx = loadSound("./i_atractores/musica_fondo.mp3");
+  // atra_sonidoArrastre_fx = loadSound("./i_atractores/arrastre.wav");
+  // atra_sonidosTipo_fx["sol"] = loadSound("./i_atractores/sol.mp3");
+  // atra_sonidosTipo_fx["nube"] = loadSound("./i_atractores/nube.mp3");
+  // atra_sonidosTipo_fx["trueno"] = loadSound("./i_atractores/trueno.mp3");
+  // atra_sonidosTipo_fx["agua"] = loadSound("./i_atractores/agua.mp3");
+
+  // Cargar imágenes
+  atra_fondo1_img = loadImage("./0_menu/assets/atra_fondo1.png");
+  atra_fondo2_img = loadImage("./0_menu/assets/atra_fondo0.png");
+  sine_fondo1_img = loadImage("./0_menu/assets/sine_fondo1.png");
+  sine_fondo2_img = loadImage("./0_menu/assets/sine_fondo0.png");
+  umbra_fondo1_img = loadImage("./0_menu/assets/umbra_fondo1.png");
+  umbra_fondo2_img = loadImage("./0_menu/assets/umbra_fondo0.png");
+
+  musica_fx = loadSound("./0_menu/assets/musica_fondo.mp3");
+
+  for (let i = 1; i <= 6; i++) {
+    logos_img[i - 1] = loadImage("./0_menu/assets/logo" + i + ".png");
+  }
+  manos_img = loadImage("./0_menu/assets/manos.png");
 }
 
 // -------------------------------------------------------------------------------SETUP
@@ -176,8 +226,12 @@ function setup() {
   isTouching = _touchStarted = _touchEnded = isMoving = false;
 
   pantalla = MENU;
-  prePantalla = nextPantalla = JERARQUIA;
+  prePantalla = nextPantalla = MENU;
   pantallaCambiando = false;
+
+  musica_fx.setLoop(true);
+  musica_fx.setVolume(0.3);
+  musica_fx.play();
 }
 
 // -------------------------------------------------------------------------------DRAW
@@ -202,21 +256,22 @@ function draw() {
           estado = new Interdependencia();
           break;
         case ATRACTORES:
-          estado = new Adaptacion();
+          estado = new Atractores();
           break;
         case JERARQUIA:
           estado = new Jerarquia();
           break;
         case SINERGIA:
-          estado = new Adaptacion();
+          estado = new Sinergia();
           break;
         case UMBRALES:
-          estado = new Adaptacion();
+          estado = new Umbrales();
           break;
       }
 
       // estados[nextPantalla].entrando = true; //menú → Infografía
     } else if (nextPantalla == MENU) {
+      menu = new Menu();
       // estados[pantalla].saliendo = true; //Infografía → Menú
       estado.saliendo = true;
     }
@@ -303,26 +358,63 @@ function keyTyped() {
   debug = !debug;
 }
 
-// -------------------------------------------------------------------------------CLASE RUTA
-// x1,y1,r1,v1 -> x[n],y[n],r[n],v[n] -> x2,y2,r2,v2
+class Atractores extends Infog {
+  constructor() {
+    super();
 
-/* -------------------------------------------------------------------------------COMPORTAMIENTOS:
-Laberinto de bolitas:
-  Piezas del laberinto:
-    -drag and drop con rotación
-  Bolitas:
-    -desplazamiento por ruta prefijada
-    -la ruta cambia
-Interdependencia:
-  Tren:
-    -varios espacios para droppear
-    -desplazamiento por ruta prefijada
-    -que giren las ruedas
-  Edificios:
-    -van apareciendo nuevos elementos en lugares específicos
-    -algunos elementos son draggeables
-Clima:
-  Objetos:
-    -se draggean por rutas preestablecidas
-    -las rutas se bifurcan
-*/
+    this.tiempo = new Timer();
+
+    atra_fondo1_img.resize(width, height);
+    atra_fondo2_img.resize(width, height);
+  }
+
+  ejecutar() {
+    this.tiempo.correr();
+    if (!this.tiempo.delayed(4)) {
+      this.fondo = atra_fondo1_img;
+    } else {
+      this.fondo = atra_fondo2_img;
+    }
+    super.ejecutar();
+  }
+}
+class Sinergia extends Infog {
+  constructor() {
+    super();
+
+    this.tiempo = new Timer();
+
+    sine_fondo1_img.resize(width, height);
+    sine_fondo2_img.resize(width, height);
+  }
+
+  ejecutar() {
+    this.tiempo.correr();
+    if (!this.tiempo.delayed(4)) {
+      this.fondo = sine_fondo1_img;
+    } else {
+      this.fondo = sine_fondo2_img;
+    }
+    super.ejecutar();
+  }
+}
+class Umbrales extends Infog {
+  constructor() {
+    super();
+
+    this.tiempo = new Timer();
+
+    umbra_fondo1_img.resize(width, height);
+    umbra_fondo2_img.resize(width, height);
+  }
+
+  ejecutar() {
+    this.tiempo.correr();
+    if (!this.tiempo.delayed(4)) {
+      this.fondo = umbra_fondo1_img;
+    } else {
+      this.fondo = umbra_fondo2_img;
+    }
+    super.ejecutar();
+  }
+}
